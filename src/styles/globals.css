@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+:root {
+  --background: rgba(226, 236, 249, 0.5);
+  --foreground: #171717;
+  --sidemenu-background: rgba(102, 102, 102, 0.05);
+  --content-background: rgba(255, 255, 255, 1);
+  --field-background: rgba(102, 102, 102, 0.05);
+  --theme-background: rgba(34, 128, 236, 1);
+  --grey-background: #ffc562;
+  --profilecard-background: rgba(249, 248, 255, 1);
+  --darkgrey-background: rgba(145, 151, 179, 1);
+  --active-background: rgba(10, 102, 194, 1);
+  --inactive-background: rgba(127, 130, 151, 1);
+  --button-background: #0077ff;
+  --hover-button-background: rgb(0, 95, 203);
+  --hover-button-foreground: #ffffff;
+  --disabled-button-background: rgb(79, 161, 255);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --content-background: rgba(31,41,55, 1);
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Poppins', sans-serif;
+}
+
+input{
+  font-family: 'Poppins', sans-serif;
+  outline: none;
+}
+
+/* ::-webkit-scrollbar {
+  display: none;
+} */
+
+.cts-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.cts-sidebar {
+  width: 220px;
+  /* border-right: 2px solid #e2dbdb; */
+  box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.2);
+}
+
+.cts-content-header {
+  /* margin-left: -1rem;
+  margin-right: -1rem; */
+  margin-top: -1rem;
+
+}
