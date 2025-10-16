@@ -9,6 +9,7 @@ import {
   deleteTemplate,
 } from "../../api/invoice/templatestyling";
 import { updateInvoiceTemplate } from "../../api/invoice/invoicetemplate";
+import { toast } from "react-toastify";
 
 interface Theme {
   themeId: string;
@@ -55,7 +56,6 @@ export default function ThemeCustomizer({
     setError(null);
     try {
       const response = await fetchAllTemplates();
-      console.log(response);
       if (response && Array.isArray(response.content)) {
         // Transform API response to match our Theme interface
         const transformed = response.content;
@@ -81,45 +81,40 @@ export default function ThemeCustomizer({
     // First update the UI immediately for better UX
     onThemeChange(themeId);
 
-    console.log(currentTemplate.templateId);
-
-    console.log(themeId);
-    
     // If we have a current template and the selected theme is a custom theme, update it via API
     if (currentTemplate) {
-      const response = await updateInvoiceTemplate(currentTemplate.templateId,{
-        themeStyle:{
-          themeId: themeId
-        }
+      const response = await updateInvoiceTemplate(currentTemplate.templateId, {
+        themeStyle: {
+          themeId: themeId,
+        },
       });
-      console.log(response);
     }
   };
 
   const handleUpdateCurrentTemplateTheme = async (themeId: string) => {
     setUpdatingTheme(themeId);
     setError(null);
-    
+
     try {
       // Find the selected theme data
-      const selectedTheme = themes.find(theme => theme.themeId === themeId);
-      
-      if (!selectedTheme) {
-        throw new Error("Selected theme not found");
-      }
+      const selectedTheme = themes.find((theme) => theme.themeId === themeId);
+
+      // if (!selectedTheme) {
+      //   throw new Error("Selected theme not found");
+      // }
 
       // Prepare theme data for update
       const themeData = {
-        themeName: selectedTheme.themeName,
-        primaryColor: selectedTheme.primaryColor,
-        secondaryColor: selectedTheme.secondaryColor,
-        backgroundColor: selectedTheme.backgroundColor,
-        textColor: selectedTheme.textColor,
+        themeName: selectedTheme?.themeName,
+        primaryColor: selectedTheme?.primaryColor,
+        secondaryColor: selectedTheme?.secondaryColor,
+        backgroundColor: selectedTheme?.backgroundColor,
+        textColor: selectedTheme?.textColor,
       };
 
       // Extract numeric ID for API call (remove 'custom-' prefix if present)
       const numericId = themeId.replace("custom-", "");
-      
+
       // Update the template with the new theme
       const response = await updateTemplate(parseInt(numericId), themeData);
 
@@ -128,16 +123,18 @@ export default function ThemeCustomizer({
         if (onThemeUpdate) {
           onThemeUpdate(themeId, themeData);
         }
-        
+
         // Show success feedback
         console.log("Theme updated successfully:", response);
       } else {
-        throw new Error("Failed to update theme");
+        toast.error("Failed to update theme", {
+          position: "top-right",
+        });
       }
     } catch (err: any) {
       setError("Failed to update theme");
       console.error("Error updating theme:", err);
-      
+
       // Revert to previous theme if update fails
       // You might want to implement a more sophisticated rollback mechanism
     } finally {
@@ -163,6 +160,7 @@ export default function ThemeCustomizer({
       };
 
       const response = await createTemplate(newThemeData);
+      console.log(response);
 
       if (response && response.themeId) {
         const newTheme: Theme = {
@@ -171,15 +169,15 @@ export default function ThemeCustomizer({
         };
 
         setThemes((prev) => [...prev, newTheme]);
-        
+
         // Automatically select the newly created theme
         onThemeChange(newTheme.themeId);
-        
+
         // If we have a current template, update it with the new theme
         if (currentTemplate) {
           await handleUpdateCurrentTemplateTheme(newTheme.themeId);
         }
-        
+
         setShowCustomTheme(false);
         setCustomTheme({
           name: "",
@@ -199,7 +197,10 @@ export default function ThemeCustomizer({
     }
   };
 
-  const handleUpdateTheme = async (themeId: string, themeData: Partial<Theme>) => {
+  const handleUpdateTheme = async (
+    themeId: string,
+    themeData: Partial<Theme>
+  ) => {
     setLoading(true);
     setError(null);
     try {
@@ -213,13 +214,15 @@ export default function ThemeCustomizer({
             theme.themeId === themeId ? { ...theme, ...themeData } : theme
           )
         );
-        
+
         // If this is the currently active theme, notify parent
         if (activeTheme === themeId && onThemeUpdate) {
           onThemeUpdate(themeId, themeData);
         }
       } else {
-        throw new Error("Failed to update theme");
+        toast.error("Failed to update theme", {
+          position: "top-right",
+        });
       }
     } catch (err: any) {
       setError("Failed to update theme");
@@ -291,7 +294,7 @@ export default function ThemeCustomizer({
           <div
             key={theme.themeId}
             className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
-              activeTheme === theme.themeId
+              activeTheme === theme.themeName
                 ? "ring-2 ring-blue-500 bg-blue-50 border-blue-300"
                 : "border-gray-200 hover:bg-gray-50"
             } ${updatingTheme === theme.themeId ? "opacity-70" : ""}`}
@@ -307,21 +310,19 @@ export default function ThemeCustomizer({
                 )}
               </div>
               <div className="flex items-center gap-2">
-                {activeTheme === theme.themeId && !updatingTheme && (
+                {activeTheme === theme.themeName && !updatingTheme && (
                   <Check className="h-4 w-4 text-blue-600" />
                 )}
-                {theme.themeId.startsWith("custom-") && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteTheme(theme.themeId);
-                    }}
-                    className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors"
-                    disabled={loading || updatingTheme === theme.themeId}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                )}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteTheme(theme.themeId);
+                  }}
+                  className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors"
+                  disabled={loading || updatingTheme === theme.themeId}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
               </div>
             </div>
             <div className="flex gap-2">

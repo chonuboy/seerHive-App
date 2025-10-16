@@ -315,7 +315,8 @@ export default function Job() {
         );
       });
       fetchContactsByJob(jobId).then((data) => {
-        if (data.content.length > 0) {
+        console.log(data);
+        if (data.content && data.content.length > 0) {
           setShortlisted(data.content);
         }
       });

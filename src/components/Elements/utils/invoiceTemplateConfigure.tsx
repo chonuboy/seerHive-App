@@ -114,10 +114,10 @@ interface InvoiceField {
 export default function InvoiceTemplateConfigure() {
   const router = useRouter();
   const params = useParams();
-  const templateId = params.id ? parseInt(params.id as string) : null;
+  const templateId = Number(router.query.id)
 
   const [activeTemplate, setActiveTemplate] = useState<InvoiceTemplate | null>(null);
-  const [activeTheme, setActiveTheme] = useState<string>("professional-blue");
+  const [activeTheme, setActiveTheme] = useState<string>("");
   const [previewMode, setPreviewMode] = useState(false);
   const [invoiceFields, setInvoiceFields] = useState<InvoiceField[]>([]);
   const [templateFieldMaps, setTemplateFieldMaps] = useState<TemplateFieldMap[]>([]);
@@ -126,6 +126,13 @@ export default function InvoiceTemplateConfigure() {
     fieldMaps: false,
   });
   const [activeTab, setActiveTab] = useState<"theme" | "fields">("theme");
+
+  const updateChangedTheme = async () => {
+    const response = await fetchInvoiceTemplate(templateId);
+    if (response) {
+      setActiveTheme(response.themeStyle.themeName);
+    }
+  };
 
   // Load specific template by ID
   const loadTemplate = useCallback(async () => {
@@ -232,12 +239,7 @@ export default function InvoiceTemplateConfigure() {
   };
 
   const handleThemeUpdate = async (themeId: string, themeData: any) => {
-    try {
-      // Handle theme updates here
-      console.log("Theme updated:", themeId, themeData);
-    } catch (error) {
-      console.error("Error handling theme update:", error);
-    }
+    console.log("theme Updated")
   };
 
   const handleBack = () => {
@@ -325,7 +327,7 @@ export default function InvoiceTemplateConfigure() {
 
                 <ThemeCustomizer
                   activeTheme={activeTheme}
-                  onThemeChange={setActiveTheme}
+                  onThemeChange={updateChangedTheme}
                   currentTemplate={activeTemplate}
                   onThemeUpdate={handleThemeUpdate}
                 />
